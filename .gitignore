@@ -64,3 +64,7 @@ Temporary Items
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,visualstudiocode,go
+.idea/**
+.idea/modules.xml
+.idea/unittest-outbound-http-calls-golang-2.iml
+.idea/vcs.xml
