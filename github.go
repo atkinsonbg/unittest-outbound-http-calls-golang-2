@@ -6,29 +6,21 @@ import (
 	"net/http"
 )
 
-// HTTPClient interface
-type HTTPClient interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
-var (
-	Client HTTPClient
-)
-
-func init() {
-	Client = &http.Client{}
+type GitHubManager struct {
+	BaseUrl string
+	Client  http.Client
 }
 
 // GetRepos takes a username and retreives
-func GetRepos(username string) ([]map[string]interface{}, error) {
-	url := fmt.Sprintf("https://api.github.com/users/%s/repos?sort=created&direction=desc", username)
+func (ghm *GitHubManager) GetRepos(username string) ([]map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/users/%s/repos?sort=created&direction=desc", ghm.BaseUrl, username)
 
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	response, err := Client.Do(request)
+	response, err := ghm.Client.Do(request)
 	if err != nil {
 		return nil, err
 	}

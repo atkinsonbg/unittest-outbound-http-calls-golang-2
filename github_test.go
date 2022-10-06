@@ -1,25 +1,12 @@
 package github
 
 import (
-	"bytes"
-	"errors"
-	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
-
-// Custom type that allows setting the func that our Mock Do func will run instead
-type MockDoType func(req *http.Request) (*http.Response, error)
-
-// MockClient is the mock client
-type MockClient struct {
-	MockDo MockDoType
-}
-
-// Overriding what the Do function should "do" in our MockClient
-func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
-	return m.MockDo(req)
-}
 
 func TestGitHubCallSuccess(t *testing.T) {
 
@@ -29,18 +16,17 @@ func TestGitHubCallSuccess(t *testing.T) {
 		}]`
 
 	// create a new reader with that JSON
-	r := ioutil.NopCloser(bytes.NewReader([]byte(jsonResponse)))
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+		_, _ = w.Write([]byte(jsonResponse))
+	}))
+	defer server.Close()
 
-	Client = &MockClient{
-		MockDo: func(*http.Request) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: 200,
-				Body:       r,
-			}, nil
-		},
+	ghm := GitHubManager{
+		BaseUrl: server.URL,
 	}
 
-	result, err := GetRepos("atkinsonbg")
+	result, err := ghm.GetRepos("atkinsonbg")
 	if err != nil {
 		t.Error("TestGitHubCallSuccess failed.")
 		return
@@ -58,47 +44,21 @@ func TestGitHubCallSuccess(t *testing.T) {
 }
 
 func TestGitHubCallFail(t *testing.T) {
+	// create a new reader with that JSON
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(404)
+	}))
+	defer server.Close()
 
-	// create a client that throws and returns an error
-	Client = &MockClient{
-		MockDo: func(*http.Request) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: 404,
-				Body:       nil,
-			}, errors.New("Mock Error")
-		},
+	ghm := GitHubManager{
+		BaseUrl: server.URL,
 	}
 
-	_, err := GetRepos("atkinsonbgthisusershouldnotexist")
+	_, err := ghm.GetRepos("atkinsonbgthisusershouldnotexist")
 	if err == nil {
 		t.Error("TestGitHubCallFail failed.")
 		return
 	}
-}
 
-func TestGitHubCallBadJsonFail(t *testing.T) {
-
-	// build our response JSON
-	jsonResponse := `{
-		"full_name": "mock-repo"
-	}`
-
-	// create a new reader with that JSON
-	r := ioutil.NopCloser(bytes.NewReader([]byte(jsonResponse)))
-
-	// create a client that throws and returns an error
-	Client = &MockClient{
-		MockDo: func(*http.Request) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: 200,
-				Body:       r,
-			}, nil
-		},
-	}
-
-	_, err := GetRepos("atkinsonbg")
-	if err == nil {
-		t.Error("TestGitHubCallBadJsonFail failed.")
-		return
-	}
+	assert.Equal(t, "EOF", err.Error())
 }
