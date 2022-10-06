@@ -32,15 +32,8 @@ func TestGitHubCallSuccess(t *testing.T) {
 		return
 	}
 
-	if len(result) == 0 {
-		t.Error("TestGitHubCallSuccess failed, array was empty.")
-		return
-	}
-
-	if result[0]["full_name"] != "mock-repo" {
-		t.Error("TestGitHubCallSuccess failed, array was not sorted correctly.")
-		return
-	}
+	assert.True(t, len(result) > 0)
+	assert.Equal(t, result[0]["full_name"], "mock-repo")
 }
 
 func TestGitHubCallFail(t *testing.T) {
