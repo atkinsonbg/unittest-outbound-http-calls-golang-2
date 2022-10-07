@@ -1,7 +1,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/O5O63ENS7)
 
 # Unittest Outbound HTTP Calls In Golang - Another Way
-This repo is in support of the blog post titled: Mocking Outbound HTTP Calls in Golang - Another Way, https://levelup.gitconnected.com/mocking-outbound-http-calls-in-golang-9e5a044c2555
+This repo is in support of the blog post titled: Mocking Outbound HTTP Calls in Golang - Another Way, https://atkinsonbg.medium.com/mocking-outbound-http-calls-in-golang-net-http-httptest-bc5629cd3c3e
 
 ## License
  
